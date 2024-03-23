@@ -8,6 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "MyAllowSpecificOrigins",
+                      policy  =>
+                      {
+                          policy.AllowAnyOrigin();
+                          policy.AllowAnyMethod();
+                          policy.AllowAnyHeader();
+                      });
+});
+
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TodoListContext>(options =>
@@ -24,7 +38,10 @@ app.UseRequestLocalization( new RequestLocalizationOptions
 
 using (var context = new TodoListContext( 
     app.Services.CreateScope().ServiceProvider.GetRequiredService<DbContextOptions<TodoListContext>>()))
-context.Database.EnsureCreated();
+    {
+        // context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
+    }
 
 if (app.Environment.IsDevelopment())
 {
@@ -97,4 +114,5 @@ app.MapPut("/todolist/update/{id}", async( TodoListContext dbContext, Todo todoI
         return Results.Ok(todoItem);
     });
 
+app.UseCors("MyAllowSpecificOrigins");
 app.Run();
