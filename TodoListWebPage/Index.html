@@ -85,72 +85,82 @@
                     <a class="nav-link active" aria-current="page">Index</a>
                 </li>
                 <li class="nav-show">
-                    <a class="nav-link">Create New</a>
+                    <a class="btn" type="button" data-bs-toggle="modal" data-bs-target="#todoModal" data-bs-id="0" data-bs-title="Create New">
+                        Create new
+                    </a>
                 </li>
             </ul>
-            
-            <div class="tab-content p-3" id="myTabContent">
-            <form>
-                <p>
-                    <select asp-for="MovieGenre" asp-items="Model.Genres">
-                        <option value="">All</option>
-                    </select>
-            
-                    Title: <input type="text" asp-for="SearchString" />
-                    <input type="submit" value="Filter" />
-                </p>
-            </form>
+                       
+            <div class="modal fade" id="todoModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="modalLabel">New message</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+
+                    <form>
+                        <div class="mb-3">
+                            <input type="hidden" id="todoid" name="id" value="0">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><strong>Title:</strong></span>
+                            <input type="text" class="form-control" name="title" id="inputTitle" value="Title" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="status"><strong>Status:</strong></label>
+                            <select class="form-select" name="status" id="inputStatus">
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Delayed">Delayed</option>
+                            </select>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><strong>Description:</strong></span>
+                            <textarea class="form-control" name="description" id="inputTextArea" rows="3" required></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="inputButton">Create</button>
+                        </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
             </div>
+              
  
 
-            <div class="accordion" id="accordionExample">
-                <div class="accordion-item">
+            <div class="accordion" id="todoAccordion">
+                <div class="accordion-item" id="accordion2">
                     <h2 class="accordion-header">
                         <div class="row align-items-center">
                             <div class="col">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${obj.id}" aria-expanded="false" aria-controls="collapse${obj.id}">
                                     <div class="col">
-                                        <strong>Title: </strong> ${obj.title}
+                                        <strong>Title: </strong>
+                                        <label id="todotitle2">Title No 2</label>
                                     </div>
                                     <div class="col">
-                                        <strong>Status:</strong> ${obj.status}
-                                    </div>                
+                                        <strong>Status:</strong>
+                                        <label id="todostatus2">Delayed</label>
+                                    </div>           
                                 </button>
                             </div>
                             <div class="col-1">
-                                <div class="col1 btn btn-primary" onclick="updateTodo(0)"> Update</div>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#todoModal" data-bs-id="2" data-bs-title="Update">Update</button>
                             </div>
                             <div class="col-1">
                                 <div class="col1 btn btn-danger" onclick="deleteTodo(0)"> Delete</div>
                             </div>
                         </div>
                     </h2>
-                    <div id="collapse${obj.id}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                    <div id="collapse${obj.id}" class="accordion-collapse collapse" data-bs-parent="#todoAccordion">
                         <div class="accordion-body">
-                        <strong>Description:</strong> ${obj.description}
-
-                        <hr>
-                        <form action="#" class="py-2">
-                            <input type="hidden" value="0"/>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><strong>Title:</strong></span>
-                                <input type="text" class="form-control" id="inputTitle" value="Title" required>
-                            </div>
-                            <div class="input-group mb-3">
-                                <label class="input-group-text" for="status"><strong>Status:</strong></label>
-                                <select class="form-select" id="status">
-                                    <option value="Completed">Completed</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="On Hold">On Hold</option>
-                                    <option value="Delayed">Delayed</option>
-                                </select>
-                            </div>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><strong>Description:</strong></span>
-                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" required>Description</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </form>
+                        <strong>Description:</strong> 
+                        <label id="tododescription2">Description No 2</label>
                         </div>
                     </div>
                 </div>
