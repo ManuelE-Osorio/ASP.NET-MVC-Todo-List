@@ -134,33 +134,34 @@
  
 
             <div class="accordion" id="todoAccordion">
-                <div class="accordion-item" id="accordion2">
+                
+                <div class="accordion-item" id="accordionTemplate" hidden>
                     <h2 class="accordion-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${obj.id}" aria-expanded="false" aria-controls="collapse${obj.id}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTemplate" aria-expanded="false" aria-controls="collapseTemplate">
                                     <div class="col">
                                         <strong>Title: </strong>
-                                        <label id="todotitle2">Title No 2</label>
+                                        <label id="todotitleTemplate">${obj.title}</label>
                                     </div>
                                     <div class="col">
                                         <strong>Status:</strong>
-                                        <label id="todostatus2">Delayed</label>
-                                    </div>           
+                                        <label id="todostatusTemplate">${obj.status}</label>
+                                    </div>                
                                 </button>
                             </div>
                             <div class="col-1">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#todoModal" data-bs-id="2" data-bs-title="Update">Update</button>
-                            </div>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#todoModal" data-bs-id="" data-bs-title="Update">Update</button>
+                        </div>
                             <div class="col-1">
-                                <div class="col1 btn btn-danger" onclick="deleteTodo(0)"> Delete</div>
+                                <div class="col1 btn btn-danger" onclick=""> Delete</div>
                             </div>
                         </div>
                     </h2>
-                    <div id="collapse${obj.id}" class="accordion-collapse collapse" data-bs-parent="#todoAccordion">
+                    <div id="collapseTemplate" class="accordion-collapse collapse" data-bs-parent="#todoAccordion">
                         <div class="accordion-body">
-                        <strong>Description:</strong> 
-                        <label id="tododescription2">Description No 2</label>
+                        <strong>Description:</strong>
+                        <label id="tododescriptionTemplate}">${obj.description}</label>
                         </div>
                     </div>
                 </div>

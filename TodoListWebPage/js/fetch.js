@@ -8,9 +8,79 @@ function handleForm(e)
 {
     e.preventDefault()
     const form = e.target
-    const formData = new FormData(form)
+    const formData = new FormData(form) //pending close modal on success, cannot be done on html because of validation
     const todo = Object.fromEntries(formData);
     console.log(todo)
+    if(todo.id == 0)
+    {
+        console.log('post')
+        postTodos(todo)
+    }
+    else
+    {
+        console.log('put')
+        putTodos(todo)
+    }
+
+}
+
+function postTodos(todo)
+{
+    const apiAddress = `https://localhost:7048/todolist`  
+    fetch(apiAddress,
+    {
+        method: 'POST',
+        headers: {
+            'Accept' : 'application/json, text/plain, */*' ,
+            'Content-Type' : 'application/json'},
+        body: JSON.stringify(todo)
+    })
+    .then( res => {
+        console.log(res.status)
+        if(res.status == 201)
+        {
+            return res.json()
+        }
+        else
+        {
+            throw new Error('cannot post todo')
+        }
+    })
+    .then( body => {
+        console.log(body)
+  
+        let html = generateItem(body)
+        let accordion = document.getElementById('todoAccordion')
+        accordion.appendChild(document.createElement(`div`))
+        accordion.lastChild.outerHTML = html        
+        
+    })
+    .catch( e => {
+        console.log('Catch', e)})
+}
+
+function putTodos(todo)
+{
+    const apiAddress = `https://localhost:7048/todolist/update/${todo.id}`
+    fetch(apiAddress,
+    {
+        method: 'PUT',
+        headers: {
+            'Accept' : 'application/json, text/plain, */*' ,
+            'Content-Type' : 'application/json'},
+        body: JSON.stringify(todo)
+    })
+    .then( res => res.status)
+    .then( stat => {
+        console.log(stat)
+        if( stat == 200 )
+        {
+            let html = generateItem(todo)
+            document.getElementById(`accordion${todo.id}`).outerHTML = html
+        }
+    })
+    .catch( e => {
+        console.log('Catch', e)})
 }
 
 function getTodos()
@@ -18,15 +88,16 @@ function getTodos()
     const apiAddress = 'https://localhost:7048/todolist'
     fetch(apiAddress)
     .then( res => res.json())
-    .then( (data) => {
+    .then( data => {
         let html = ``
         data.forEach(element => {
             console.log(element)
             html += generateItem(element)
         });
-        document.getElementById('todoAccordion').innerHTML = html
+        document.getElementById('todoAccordion').innerHTML += html
         })
-    .catch( e => console.log(e))
+    .catch( e => {
+        console.log('Catch', e)})
 }
 
 function updateTodo(id)
@@ -53,9 +124,11 @@ function deleteTodo(id)
         }
     
     })
+    .catch( e => {
+        console.log('Catch', e)})
 }
 
-function generateItem(obj)
+function generateItem(obj)  //use clone node?  add color on accordion-button depending on status
 {
     return `<div class="accordion-item" id="accordion${obj.id}">
     <h2 class="accordion-header">
@@ -109,18 +182,18 @@ function createModal(event)
     {
         const todoItem = document.getElementById(`accordion${id}`)
         const todoTitle = todoItem.querySelector(`#todotitle${id}`).innerHTML
-        const todoStatus = todoItem.querySelector(`#todostatus${id}`).innerHTML  //pending set status
+        const todoStatus = todoItem.querySelector(`#todostatus${id}`).innerHTML
         const todoDescription = todoItem.querySelector(`#tododescription${id}`).innerHTML
 
         
-        modalTodoTitle.setAttribute('value', `${todoTitle}`)
+        modalTodoTitle.value = todoTitle
         modalStatus.value = todoStatus
-        modalTodoDesc.value = todoDescription  //pending change button to update
+        modalTodoDesc.value = todoDescription
         modalButton.innerHTML = 'Update'
     }
     else
     {
-        modalTodoTitle.setAttribute('value', '')
+        modalTodoTitle.value = ''
         modalTodoDesc.value = ''
         modalButton.innerHTML = 'Create'
     }
