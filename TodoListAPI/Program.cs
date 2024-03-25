@@ -1,58 +1,97 @@
 using System.Data;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using TodoListAPI.Models;
 
-namespace TodoListAPI;
+var builder = WebApplication.CreateBuilder(args);
 
-public class TodoListAPI
+// Add services to the container.
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddCors();
+builder.Services.AddCors(options =>
 {
-    public static void Main(string[] args)
+    options.AddPolicy(name: "MyAllowSpecificOrigins",
+                      policy  =>
+                      {
+                          policy.AllowAnyOrigin();
+                          policy.AllowAnyMethod();
+                          policy.AllowAnyHeader();
+                      });
+});
+
+
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<TodoListContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TodoListConnectionString") ?? 
+        throw new InvalidOperationException("Connection string 'MovieContext' not found.")));
+
+var app = builder.Build();
+
+app.UseRequestLocalization( new RequestLocalizationOptions
     {
-        var builder = WebApplication.CreateBuilder(args);
+        DefaultRequestCulture = new RequestCulture("en-US")
+    }
+);
 
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy(name: "AllowAnyOrigin",
-                policy  =>
-                {
-                    policy.AllowAnyOrigin();
-                    policy.AllowAnyMethod();
-                    policy.AllowAnyHeader();
-                });
-        });
-
-        builder.Services.AddDbContext<TodoListContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("TodoListConnectionString") ?? 
-                throw new InvalidOperationException("Connection string 'MovieContext' not found.")));
-
-        var app = builder.Build();
-
-        app.UseRequestLocalization( new RequestLocalizationOptions
-            {
-                DefaultRequestCulture = new RequestCulture("en-US")
-            }
-        );
-
-        using (var context = new TodoListContext( 
-            app.Services.CreateScope().ServiceProvider.GetRequiredService<DbContextOptions<TodoListContext>>()))
-            {
-                context.Database.EnsureCreated();
-            }
-
-        var todoItems = app.MapGroup("/todolist");
-        todoItems.MapGet("/", GetAllTodos);
-        todoItems.MapGet("/{id}", GetTodoById);
-        todoItems.MapPost("/", PostTodo);
-        todoItems.MapDelete("/delete/{id}", DeleteTodo);
-        todoItems.MapPut("/update/{id}", PutTodo);
-
-        app.UseHttpsRedirection();
-        app.UseCors("AllowAnyOrigin");
-        app.Run();
+using (var context = new TodoListContext( 
+    app.Services.CreateScope().ServiceProvider.GetRequiredService<DbContextOptions<TodoListContext>>()))
+    {
+        // context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
     }
 
-    public static async Task<IResult> PutTodo(TodoListContext dbContext, Todo todoItem, int id)
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.MapGet("/todolist", async (TodoListContext dbContext) => await dbContext.Todos.ToListAsync() );
+
+app.MapGet("/todolist/{id}", async (TodoListContext dbContext, int id) => {
+        var todoItem = await dbContext.Todos.FindAsync(id);
+        if(todoItem is null)
+        {
+            return Results.NotFound();
+        }
+        else
+            return Results.Ok(todoItem);
+    });
+
+app.MapPost( "/todolist", async (TodoListContext dbContext, Todo todoItem) => 
+    {
+        dbContext.Todos.Add(todoItem);
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch
+        {
+            return Results.BadRequest();
+        }
+        return Results.Created($"todolist/{todoItem.Id}", todoItem);
+    });
+
+app.MapDelete("/todolist/delete/{id}", async( TodoListContext dbContext, int id) =>
+    {
+        var todoItem = await dbContext.Todos.FindAsync(id);
+        if (todoItem != null)
+        {
+            dbContext.Todos.Remove(todoItem);
+        }
+        else
+            return Results.NotFound();
+
+        await dbContext.SaveChangesAsync();
+        return Results.Ok();
+    });
+
+app.MapPut("/todolist/update/{id}", async( TodoListContext dbContext, Todo todoItem, int id) => 
     {
         if(id != todoItem.Id)
             return Results.BadRequest();
@@ -73,50 +112,7 @@ public class TodoListAPI
             return Results.NotFound();
 
         return Results.Ok(todoItem);
-    }
+    });
 
-    public static async Task<IResult> GetAllTodos(TodoListContext dbContext)
-    {
-        return TypedResults.Ok(await dbContext.Todos.ToListAsync());
-    }
-
-    public static async Task<IResult> GetTodoById(TodoListContext dbContext, int id)
-    {
-        var todoItem = await dbContext.Todos.FindAsync(id);
-        if(todoItem is null)
-        {
-            return TypedResults.NotFound();
-        }
-        else
-            return TypedResults.Ok(todoItem);
-    }
-
-    public static async Task<IResult> PostTodo(TodoListContext dbContext, Todo todoItem)
-    {
-        dbContext.Todos.Add(todoItem);
-        try
-        {
-            await dbContext.SaveChangesAsync();
-        }
-        catch
-        {
-            return TypedResults.BadRequest();
-        }
-        return TypedResults.Created($"todolist/{todoItem.Id}", todoItem);
-    }
-
-    public static async Task<IResult> DeleteTodo(TodoListContext dbContext, int id)
-    {
-        var todoItem = await dbContext.Todos.FindAsync(id);
-        if (todoItem != null)
-        {
-            dbContext.Todos.Remove(todoItem);
-        }
-        else
-            return TypedResults.NotFound();
-
-        await dbContext.SaveChangesAsync();
-        return TypedResults.Ok();
-    }
-}
-
+app.UseCors("MyAllowSpecificOrigins");
+app.Run();
