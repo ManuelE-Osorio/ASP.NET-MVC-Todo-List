@@ -3,30 +3,21 @@ window.onload = getTodos()
 document.getElementById('todoModal').addEventListener('show.bs.modal', event => createModal(event))
 document.getElementById('todoModal').querySelector('form').addEventListener('submit', handleForm)
 
-function handleForm(e)
-{
-    e.preventDefault()
-    const form = e.target
-    const formData = new FormData(form)
+function handleForm(event){
+    event.preventDefault()
+    const formData = new FormData(event.target)
     const todo = Object.fromEntries(formData);
-    console.log(todo)
-    if(todo.id == 0)
-    {
-        console.log('post')
+    if(todo.id == 0){
         postTodos(todo)
     }
-    else
-    {
-        console.log('put')
+    else{
         putTodos(todo)
     }
-
-    var myModal = bootstrap.Modal.getInstance(document.getElementById('todoModal'))
-    myModal.hide()
+    var modal = bootstrap.Modal.getInstance(document.getElementById('todoModal'))
+    modal.hide()
 }
 
-function postTodos(todo)
-{
+function postTodos(todo){
     const apiAddress = `https://localhost:7048/todolist`  
     fetch(apiAddress,
     {
@@ -36,32 +27,23 @@ function postTodos(todo)
             'Content-Type' : 'application/json'},
         body: JSON.stringify(todo)
     })
-    .then( res => {
-        console.log(res.status)
-        if(res.status == 201)
-        {
-            return res.json()
+    .then( response => {
+        if(response.status == 201){
+            return response.json()
         }
-        else
-        {
-            throw new Error('cannot post todo')
+        else{
+            throw new Error('Server error, please try again later.')
         }
     })
     .then( body => {
-        console.log(body)
-  
-        let html = generateItem(body)
-        let accordion = document.getElementById('todoAccordion')
-        accordion.appendChild(document.createElement(`div`))
-        accordion.lastChild.outerHTML = html        
-        
+        document.getElementById('todoAccordion').appendChild(generateAccordion(body))
     })
     .catch( e => {
+        window.alert(e)
         console.log('Catch', e)})
 }
 
-function putTodos(todo)
-{
+function putTodos(todo){
     const apiAddress = `https://localhost:7048/todolist/update/${todo.id}`
     fetch(apiAddress,
     {
@@ -71,39 +53,43 @@ function putTodos(todo)
             'Content-Type' : 'application/json'},
         body: JSON.stringify(todo)
     })
-    .then( res => res.status)
-    .then( stat => {
-        console.log(stat)
-        if( stat == 200 )
-        {
-            let html = generateItem(todo)
-            document.getElementById(`accordion${todo.id}`).outerHTML = html
-        }
+    .then( response => {
+            if(response.status == 200){
+                return response.json()
+            }
+            else{
+                throw new Error('Server error, please try again later.')
+            }
+        })
+    .then( body => {
+        document.getElementById(`accordion${body.id}`).replaceWith(generateAccordion(body))
     })
     .catch( e => {
-        console.log('Catch', e)})
+        window.alert(e)
+        console.log('Catch', e)
+    })
 }
 
-function getTodos()
-{
+function getTodos(){
     const apiAddress = 'https://localhost:7048/todolist'
     fetch(apiAddress)
-    .then( res => res.json())
+    .then( response => {
+        if( response.status == 200){
+            return response.json()
+        }
+        else{
+            throw new Error('Server error, please try again later.')            
+        }
+    })
     .then( data => {
-        let html = ``
+        const accordion = document.getElementById('todoAccordion')
         data.forEach(element => {
-            console.log(element)
-            html += generateItem(element)
+            accordion.appendChild(generateAccordion(element))
         });
-        document.getElementById('todoAccordion').innerHTML += html
-        })
+    })
     .catch( e => {
+        window.alert(e)
         console.log('Catch', e)})
-}
-
-function updateTodo(id)
-{
-    console.log(`update id: ${id}`)
 }
 
 function deleteTodo(id)
@@ -116,51 +102,68 @@ function deleteTodo(id)
             'Accept' : 'application/json, text/plain, */*' ,
             'Content-Type' : 'application/json'}
     })
-    .then( res => res.status)
-    .then( stat => {
-        console.log(stat)
-        if( stat == 200 )
-        {
-            document.getElementById(`accordion${id}`).remove()
+    .then( response => {
+        if( response.status == 200){
+            return
         }
-    
+        else{
+            throw new Error('Server error, please try again later.')            
+        }
+    })
+    .then( () => {
+        document.getElementById(`accordion${id}`).remove()    
     })
     .catch( e => {
         console.log('Catch', e)})
 }
 
-function generateItem(obj)  //use clone node?  add color on accordion-button depending on status
+function generateAccordion(obj)
 {
-    return `<div class="accordion-item" id="accordion${obj.id}">
-    <h2 class="accordion-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${obj.id}" aria-expanded="false" aria-controls="collapse${obj.id}">
-                    <div class="col">
-                        <strong>Title: </strong>
-                        <label id="todotitle${obj.id}">${obj.title}</label>
-                    </div>
-                    <div class="col">
-                        <strong>Status:</strong>
-                        <label id="todostatus${obj.id}">${obj.status}</label>
-                    </div>                
-                </button>
-            </div>
-            <div class="col-1">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#todoModal" data-bs-id="${obj.id}" data-bs-title="Update">Update</button>
-        </div>
-            <div class="col-1">
-                <div class="col1 btn btn-danger" onclick="deleteTodo(${obj.id})"> Delete</div>
-            </div>
-        </div>
-    </h2>
-    <div id="collapse${obj.id}" class="accordion-collapse collapse" data-bs-parent="#todoAccordion">
-        <div class="accordion-body">
-        <strong>Description:</strong>
-        <label id="tododescription${obj.id}">${obj.description}</label>
-        </div>
-    </div>
-    </div>`
+    const accordion = document.getElementById('accordionTemplate').cloneNode(true)
+    accordion.setAttribute('id', `accordion${obj.id}`) 
+    accordion.hidden = false
+
+    const button = accordion.querySelector('button')
+    button.setAttribute('data-bs-target', `#collapse${obj.id}`)
+    button.setAttribute('aria-controls', `collapse${obj.id}`)
+    switch(obj.status)
+    {
+        case 'In Progress':
+            button.setAttribute('class', button.getAttribute('class')+' bg-primary-subtle')
+            break;
+        case 'Completed':
+            button.setAttribute('class', button.getAttribute('class')+' bg-success-subtle')
+            break;
+        case 'On Hold':
+            button.setAttribute('class', button.getAttribute('class')+' bg-warning-subtle')
+            break;
+        case 'Delayed':
+            button.setAttribute('class', button.getAttribute('class')+' bg-danger-subtle')
+            break;
+    }
+
+    const title = accordion.querySelector('#todotitleTemplate')
+    title.setAttribute('id', `todotitle${obj.id}`)
+    title.innerHTML = obj.title
+
+    const status = accordion.querySelector('#todostatusTemplate')
+    status.setAttribute('id', `todostatus${obj.id}`)
+    status.innerHTML = obj.status
+
+    const button2 = accordion.getElementsByTagName('button')[1]
+    button2.setAttribute('data-bs-id', `${obj.id}`)
+
+    const button3 = accordion.getElementsByTagName('button')[2]
+    button3.setAttribute('onclick', `deleteTodo(${obj.id})`)
+
+    const collapse = accordion.querySelector('#collapseTemplate')
+    collapse.setAttribute('id', `collapse${obj.id}`)
+
+    const description = accordion.querySelector('#tododescriptionTemplate')
+    description.setAttribute('id', `tododescription${obj.id}`)
+    description.innerHTML = obj.description
+
+    return accordion
 }
 
 function createModal(event)
@@ -186,7 +189,6 @@ function createModal(event)
         const todoStatus = todoItem.querySelector(`#todostatus${id}`).innerHTML
         const todoDescription = todoItem.querySelector(`#tododescription${id}`).innerHTML
 
-        
         modalTodoTitle.value = todoTitle
         modalStatus.value = todoStatus
         modalTodoDesc.value = todoDescription
@@ -198,5 +200,4 @@ function createModal(event)
         modalTodoDesc.value = ''
         modalButton.innerHTML = 'Create'
     }
-
 }

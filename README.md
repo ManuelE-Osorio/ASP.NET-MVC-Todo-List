@@ -17,3 +17,4 @@ ASP.NET MVC Todo List app using Minimal and Fetch API
 5. <https://learn.microsoft.com/en-us/aspnet/core/fundamentals/apis?view=aspnetcore-8.0>
 6. <https://learn.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-8.0#ecors6>
 7. <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value>
+8. <https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/responses?view=aspnetcore-8.0#typedresults-vs-results>
