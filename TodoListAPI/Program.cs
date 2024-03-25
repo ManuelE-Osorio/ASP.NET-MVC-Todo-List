@@ -55,7 +55,7 @@ public class TodoListAPI
     public static async Task<IResult> PutTodo(TodoListContext dbContext, Todo todoItem, int id)
     {
         if(id != todoItem.Id)
-            return Results.BadRequest();
+            return TypedResults.BadRequest();
 
         if (todoItem != null && dbContext.Todos.Any( p => p.Id == todoItem.Id ) )
         {
@@ -66,13 +66,13 @@ public class TodoListAPI
             }
             catch(DBConcurrencyException)
             {
-                return Results.StatusCode(500);
+                return TypedResults.StatusCode(500);
             }
         }
         else
-            return Results.NotFound();
+            return TypedResults.NotFound();
 
-        return Results.Ok(todoItem);
+        return TypedResults.Ok(todoItem);
     }
 
     public static async Task<IResult> GetAllTodos(TodoListContext dbContext)
