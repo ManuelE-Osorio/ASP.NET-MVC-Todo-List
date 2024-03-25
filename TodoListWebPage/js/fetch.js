@@ -3,12 +3,6 @@ window.onload = getTodos()
 document.getElementById('todoModal').addEventListener('show.bs.modal', event => createModal(event))
 document.getElementById('todoModal').querySelector('form').addEventListener('submit', handleForm)
 
-testModal()
-function testModal()
-{
-
-}
-
 function handleForm(e)
 {
     e.preventDefault()
