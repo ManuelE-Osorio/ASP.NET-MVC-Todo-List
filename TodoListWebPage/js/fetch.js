@@ -3,12 +3,17 @@ window.onload = getTodos()
 document.getElementById('todoModal').addEventListener('show.bs.modal', event => createModal(event))
 document.getElementById('todoModal').querySelector('form').addEventListener('submit', handleForm)
 
+testModal()
+function testModal()
+{
+
+}
 
 function handleForm(e)
 {
     e.preventDefault()
     const form = e.target
-    const formData = new FormData(form) //pending close modal on success, cannot be done on html because of validation
+    const formData = new FormData(form)
     const todo = Object.fromEntries(formData);
     console.log(todo)
     if(todo.id == 0)
@@ -22,6 +27,8 @@ function handleForm(e)
         putTodos(todo)
     }
 
+    var myModal = bootstrap.Modal.getInstance(document.getElementById('todoModal'))
+    myModal.hide()
 }
 
 function postTodos(todo)
@@ -175,7 +182,7 @@ function createModal(event)
     const modalTodoDesc = exampleModal.querySelector('#inputTextArea')
     const modalButton = exampleModal.querySelector('#inputButton')
 
-    modalTitle.textContent = `${title} Todo Item ${id}`  //delete id
+    modalTitle.textContent = `${title} Todo`
     modalid.setAttribute('value', `${id}`)
 
     if(id > 0)

@@ -133,8 +133,7 @@
               
  
 
-            <div class="accordion" id="todoAccordion">
-                
+            <div class="accordion" id="todoAccordion">          
                 <div class="accordion-item" id="accordionTemplate" hidden>
                     <h2 class="accordion-header">
                         <div class="row align-items-center">
@@ -142,16 +141,16 @@
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTemplate" aria-expanded="false" aria-controls="collapseTemplate">
                                     <div class="col">
                                         <strong>Title: </strong>
-                                        <label id="todotitleTemplate">${obj.title}</label>
+                                        <label id="todotitleTemplate"></label>
                                     </div>
                                     <div class="col">
                                         <strong>Status:</strong>
-                                        <label id="todostatusTemplate">${obj.status}</label>
+                                        <label id="todostatusTemplate"></label>
                                     </div>                
                                 </button>
                             </div>
                             <div class="col-1">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#todoModal" data-bs-id="" data-bs-title="Update">Update</button>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#todoModal" data-bs-id="0" data-bs-title="Update">Update</button>
                         </div>
                             <div class="col-1">
                                 <div class="col1 btn btn-danger" onclick=""> Delete</div>
@@ -161,7 +160,7 @@
                     <div id="collapseTemplate" class="accordion-collapse collapse" data-bs-parent="#todoAccordion">
                         <div class="accordion-body">
                         <strong>Description:</strong>
-                        <label id="tododescriptionTemplate}">${obj.description}</label>
+                        <label id="tododescriptionTemplate"></label>
                         </div>
                     </div>
                 </div>
