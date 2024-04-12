@@ -2,6 +2,8 @@ window.onload = getTodos()
 
 document.getElementById('todoModal').addEventListener('show.bs.modal', event => createModal(event))
 document.getElementById('todoModal').querySelector('form').addEventListener('submit', handleForm)
+document.getElementById('deleteModal').addEventListener('show.bs.modal', event => deleteModal(event))
+document.getElementById('deleteModal').querySelector('form').addEventListener('submit', deleteForm)
 
 function handleForm(event){
     event.preventDefault()
@@ -16,6 +18,18 @@ function handleForm(event){
     var modal = bootstrap.Modal.getInstance(document.getElementById('todoModal'))
     modal.hide()
 }
+
+function deleteForm(event){
+    event.preventDefault()
+    const formData = new FormData(event.target)
+    const data = Object.fromEntries(formData)
+    if( data.id > 0){
+        deleteTodo(data.id)
+    }
+    var modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'))
+    modal.hide()  
+}
+
 
 function postTodos(todo){
     const apiAddress = `https://localhost:7048/todolist`  
@@ -154,7 +168,7 @@ function generateAccordion(obj)
     button2.setAttribute('data-bs-id', `${obj.id}`)
 
     const button3 = accordion.getElementsByTagName('button')[2]
-    button3.setAttribute('onclick', `deleteTodo(${obj.id})`)
+    button3.setAttribute('data-bs-id', `${obj.id}`)
 
     const collapse = accordion.querySelector('#collapseTemplate')
     collapse.setAttribute('id', `collapse${obj.id}`)
@@ -200,4 +214,17 @@ function createModal(event)
         modalTodoDesc.value = ''
         modalButton.innerHTML = 'Create'
     }
+}
+
+function deleteModal(event)
+{
+    const exampleModal = document.getElementById('deleteModal')
+    const id = event.relatedTarget.getAttribute('data-bs-id')
+    const title = event.relatedTarget.getAttribute('data-bs-title')
+
+    const modalTitle = exampleModal.querySelector('.modal-title')
+    const modalid = exampleModal.querySelector('#todoid')
+
+    modalTitle.textContent = `${title} Todo`
+    modalid.setAttribute('value', `${id}`)
 }
